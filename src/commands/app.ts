@@ -7,6 +7,12 @@ type Logger = (msg: string) => void;
 /** Fetch function signature for dependency injection in tests. */
 type FetchFn = (path: string, opts?: any) => Promise<any>;
 
+/** Create a fetch function that forwards the given token to apiFetch. */
+function boundFetch(token: string | undefined): FetchFn {
+  if (!token) return apiFetch;
+  return (path, opts) => apiFetch(path, { ...opts, token });
+}
+
 interface AppCreateOpts {
   name: string;
 }
@@ -118,7 +124,8 @@ export function registerAppCommands(program: Command): void {
     .requiredOption("--name <name>", "Application name")
     .action(async (opts) => {
       try {
-        await handleAppCreate(opts);
+        const token = program.opts().token;
+        await handleAppCreate(opts, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
@@ -131,7 +138,8 @@ export function registerAppCommands(program: Command): void {
     .option("--format <fmt>", "Output format (table or json)", "table")
     .action(async (opts) => {
       try {
-        await handleAppList(opts);
+        const token = program.opts().token;
+        await handleAppList(opts, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
@@ -144,7 +152,8 @@ export function registerAppCommands(program: Command): void {
     .requiredOption("--install <installId>", "Installation ID")
     .action(async (appId, opts) => {
       try {
-        await handleAppToken({ appId, installId: opts.install });
+        const token = program.opts().token;
+        await handleAppToken({ appId, installId: opts.install }, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);

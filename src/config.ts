@@ -76,7 +76,10 @@ export function readAuth(): CliAuth {
 
 export function writeAuth(auth: CliAuth): void {
   ensureDir();
-  writeFileSync(authPath(), JSON.stringify(auth, null, 2) + "\n", "utf-8");
+  writeFileSync(authPath(), JSON.stringify(auth, null, 2) + "\n", {
+    encoding: "utf-8",
+    mode: 0o600,
+  });
 }
 
 export function clearAuth(): void {

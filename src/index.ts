@@ -21,4 +21,7 @@ registerAppCommands(program);
 registerStatusCommand(program);
 registerInitCommand(program);
 
-program.parse();
+program.parseAsync(process.argv).catch((err) => {
+  console.error(err.message);
+  process.exit(1);
+});

@@ -174,6 +174,7 @@ export function registerRepoCommands(program: Command): void {
           console.warn(
             `Warning: This will permanently delete repository ${id}. Use --yes to confirm.`,
           );
+          return;
         }
         const token = opts.token ?? program.opts().token;
         const client = createClient(token);

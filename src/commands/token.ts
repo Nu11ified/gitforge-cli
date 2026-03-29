@@ -7,6 +7,12 @@ type Logger = (msg: string) => void;
 /** Fetch function signature for dependency injection in tests. */
 type FetchFn = (path: string, opts?: any) => Promise<any>;
 
+/** Create a fetch function that forwards the given token to apiFetch. */
+function boundFetch(token: string | undefined): FetchFn {
+  if (!token) return apiFetch;
+  return (path, opts) => apiFetch(path, { ...opts, token });
+}
+
 interface TokenCreateOpts {
   name: string;
   scopes?: string;
@@ -119,7 +125,8 @@ export function registerTokenCommands(program: Command): void {
     .option("--scopes <scopes>", "Comma-separated scopes (default: repo:read,repo:write)")
     .action(async (opts) => {
       try {
-        await handleTokenCreate(opts);
+        const token = program.opts().token;
+        await handleTokenCreate(opts, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
@@ -132,7 +139,8 @@ export function registerTokenCommands(program: Command): void {
     .option("--format <fmt>", "Output format (table or json)", "table")
     .action(async (opts) => {
       try {
-        await handleTokenList(opts);
+        const token = program.opts().token;
+        await handleTokenList(opts, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
@@ -144,7 +152,8 @@ export function registerTokenCommands(program: Command): void {
     .description("Revoke a personal access token")
     .action(async (id, _opts) => {
       try {
-        await handleTokenRevoke(id);
+        const token = program.opts().token;
+        await handleTokenRevoke(id, console.log, boundFetch(token));
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
