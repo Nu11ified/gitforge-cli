@@ -13,8 +13,10 @@
     "build": "bun build src/index.ts --outdir dist --target node"
   },
   "dependencies": {
+    "@gitforge/billing": "workspace:*",
     "@gitforge/sdk": "file:../typescript",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "stripe": "^20.4.0"
   },
   "devDependencies": {
     "bun-types": "^1.3.10"
