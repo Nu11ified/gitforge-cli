@@ -23,6 +23,7 @@ registerAppCommands(program);
 registerStatusCommand(program);
 registerInitCommand(program);
 registerBillingCommands(program);
+registerReleaseCommands(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
