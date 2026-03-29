@@ -1,0 +1,23 @@
+import { Command } from "commander";
+import { registerAuthCommands } from "./commands/auth";
+import { registerRepoCommands } from "./commands/repo";
+import { registerTokenCommands } from "./commands/token";
+import { registerAppCommands } from "./commands/app";
+import { registerStatusCommand } from "./commands/status";
+import { registerInitCommand } from "./commands/init";
+
+const program = new Command();
+
+program
+  .name("gitforge")
+  .description("Terminal-native management tool for GitForge")
+  .version("0.0.1");
+
+registerAuthCommands(program);
+registerRepoCommands(program);
+registerTokenCommands(program);
+registerAppCommands(program);
+registerStatusCommand(program);
+registerInitCommand(program);
+
+program.parse();
