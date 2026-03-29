@@ -123,10 +123,10 @@ export function registerRepoCommands(program: Command): void {
     .requiredOption("--name <name>", "Repository name")
     .option("--visibility <vis>", "Visibility (public or private)")
     .option("--description <desc>", "Repository description")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
-        const client = createClient(opts.token);
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
         await handleRepoCreate(client, opts);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
@@ -139,10 +139,10 @@ export function registerRepoCommands(program: Command): void {
     .description("List repositories")
     .option("--format <fmt>", "Output format (table or json)", "table")
     .option("--limit <n>", "Maximum number of repos", parseInt)
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
-        const client = createClient(opts.token);
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
         await handleRepoList(client, opts);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
@@ -153,10 +153,10 @@ export function registerRepoCommands(program: Command): void {
   repo
     .command("get <id>")
     .description("Get repository details")
-    .option("--token <pat>", "Authentication token")
     .action(async (id, opts) => {
       try {
-        const client = createClient(opts.token);
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
         await handleRepoGet(client, id);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
@@ -168,7 +168,6 @@ export function registerRepoCommands(program: Command): void {
     .command("delete <id>")
     .description("Delete a repository")
     .option("--yes", "Skip confirmation")
-    .option("--token <pat>", "Authentication token")
     .action(async (id, opts) => {
       try {
         if (!opts.yes) {
@@ -176,7 +175,8 @@ export function registerRepoCommands(program: Command): void {
             `Warning: This will permanently delete repository ${id}. Use --yes to confirm.`,
           );
         }
-        const client = createClient(opts.token);
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
         await handleRepoDelete(client, id);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);

@@ -34,8 +34,8 @@ export function handleAuthLogin(
  * Handle `gitforge auth status`.
  * Shows whether the user is authenticated and a masked token.
  */
-export function handleAuthStatus(log: Logger = console.log): void {
-  const token = resolveToken(undefined);
+export function handleAuthStatus(log: Logger = console.log, flagToken?: string): void {
+  const token = resolveToken(flagToken);
 
   if (token) {
     const masked = token.substring(0, 6) + "...";
@@ -49,8 +49,8 @@ export function handleAuthStatus(log: Logger = console.log): void {
  * Handle `gitforge auth token`.
  * Prints raw token to stdout for piping. Returns exit code.
  */
-export function handleAuthToken(log: Logger = console.log): number {
-  const token = resolveToken(undefined);
+export function handleAuthToken(log: Logger = console.log, flagToken?: string): number {
+  const token = resolveToken(flagToken);
 
   if (token) {
     log(token);
@@ -91,14 +91,16 @@ export function registerAuthCommands(program: Command): void {
     .command("status")
     .description("Show current authentication status")
     .action(() => {
-      handleAuthStatus();
+      const globalToken = program.opts().token;
+      handleAuthStatus(console.log, globalToken);
     });
 
   auth
     .command("token")
     .description("Print the current authentication token")
     .action(() => {
-      const code = handleAuthToken();
+      const globalToken = program.opts().token;
+      const code = handleAuthToken(console.log, globalToken);
       if (code !== 0) {
         process.exit(code);
       }

@@ -63,10 +63,10 @@ export function registerStatusCommand(program: Command): void {
   program
     .command("status")
     .description("Show GitForge instance status and connectivity")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
-        await handleStatus(console.log, undefined, opts.token);
+        const token = opts.token ?? program.opts().token;
+        await handleStatus(console.log, undefined, token);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);

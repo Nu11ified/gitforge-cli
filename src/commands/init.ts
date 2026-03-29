@@ -66,10 +66,10 @@ export function registerInitCommand(program: Command): void {
     .command("init")
     .description("Initialize GitForge CLI configuration")
     .option("--endpoint <url>", "GitForge API endpoint (default: http://localhost:3001)")
-    .option("--token <pat>", "Personal access token")
     .action(async (opts) => {
       try {
-        await handleInit(opts);
+        const token = opts.token ?? program.opts().token;
+        await handleInit({ ...opts, token });
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);

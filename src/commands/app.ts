@@ -116,7 +116,6 @@ export function registerAppCommands(program: Command): void {
     .command("create")
     .description("Create a new OAuth application")
     .requiredOption("--name <name>", "Application name")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
         await handleAppCreate(opts);
@@ -130,7 +129,6 @@ export function registerAppCommands(program: Command): void {
     .command("list")
     .description("List OAuth applications")
     .option("--format <fmt>", "Output format (table or json)", "table")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
         await handleAppList(opts);
@@ -144,7 +142,6 @@ export function registerAppCommands(program: Command): void {
     .command("token <appId>")
     .description("Generate an installation token")
     .requiredOption("--install <installId>", "Installation ID")
-    .option("--token <pat>", "Authentication token")
     .action(async (appId, opts) => {
       try {
         await handleAppToken({ appId, installId: opts.install });

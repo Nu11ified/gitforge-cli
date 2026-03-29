@@ -117,7 +117,6 @@ export function registerTokenCommands(program: Command): void {
     .description("Create a new personal access token")
     .requiredOption("--name <name>", "Token name")
     .option("--scopes <scopes>", "Comma-separated scopes (default: repo:read,repo:write)")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
         await handleTokenCreate(opts);
@@ -131,7 +130,6 @@ export function registerTokenCommands(program: Command): void {
     .command("list")
     .description("List personal access tokens")
     .option("--format <fmt>", "Output format (table or json)", "table")
-    .option("--token <pat>", "Authentication token")
     .action(async (opts) => {
       try {
         await handleTokenList(opts);
@@ -144,7 +142,6 @@ export function registerTokenCommands(program: Command): void {
   token
     .command("revoke <id>")
     .description("Revoke a personal access token")
-    .option("--token <pat>", "Authentication token")
     .action(async (id, _opts) => {
       try {
         await handleTokenRevoke(id);

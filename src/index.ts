@@ -11,7 +11,8 @@ const program = new Command();
 program
   .name("gitforge")
   .description("Terminal-native management tool for GitForge")
-  .version("0.0.1");
+  .version("0.0.1")
+  .option("--token <pat>", "API token (overrides env and stored auth)");
 
 registerAuthCommands(program);
 registerRepoCommands(program);
