@@ -7,6 +7,7 @@ import { registerStatusCommand } from "./commands/status";
 import { registerInitCommand } from "./commands/init";
 import { registerBillingCommands } from "./commands/billing";
 import { registerReleaseCommands } from "./commands/release";
+import { registerStorageCommands } from "./commands/storage";
 
 const program = new Command();
 
@@ -24,6 +25,7 @@ registerStatusCommand(program);
 registerInitCommand(program);
 registerBillingCommands(program);
 registerReleaseCommands(program);
+registerStorageCommands(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
