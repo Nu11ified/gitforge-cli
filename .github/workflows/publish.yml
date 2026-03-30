@@ -22,9 +22,18 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       # @gitforge/sdk may not be published yet on first release.
-      # --force lets npm continue past the missing dependency.
-      # The built CLI externalizes it — end users get it via npm install.
-      - run: npm install --force
+      # Try npm first; fall back to building SDK from source.
+      - name: Install dependencies
+        run: |
+          if npm install 2>&1; then
+            echo "All dependencies installed from npm"
+          else
+            echo "::notice::@gitforge/sdk not on npm yet — building from source"
+            git clone --depth 1 https://github.com/Nu11ified/gitforge-ts-sdk.git /tmp/sdk
+            cd /tmp/sdk && bun install && bun run build && cd -
+            npm install /tmp/sdk
+            npm install
+          fi
       - run: npm run build
       - run: npm publish --access public
         env:
