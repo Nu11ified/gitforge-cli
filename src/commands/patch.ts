@@ -164,6 +164,138 @@ export async function handlePatchMaterialize(
   log(`Status: ${result.status}`);
 }
 
+// ---------------------------------------------------------------------------
+// Sharing handlers
+// ---------------------------------------------------------------------------
+
+/**
+ * Handle `gitforge patch publish`.
+ */
+export async function handlePatchPublish(
+  client: GitForge,
+  opts: PatchSetIdOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  const result = await client.patchSets.publish(opts.set);
+  log(`Published patch set:`);
+  log(`  ID:   ${result.id}`);
+  log(`  Name: ${result.name}`);
+}
+
+/**
+ * Handle `gitforge patch unpublish`.
+ */
+export async function handlePatchUnpublish(
+  client: GitForge,
+  opts: PatchSetIdOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  await client.patchSets.unpublish(opts.set);
+  log(`Unpublished patch set ${opts.set}`);
+}
+
+interface PatchForkOpts {
+  name?: string;
+}
+
+/**
+ * Handle `gitforge patch fork <setId>`.
+ */
+export async function handlePatchFork(
+  client: GitForge,
+  setId: string,
+  opts: PatchForkOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  const result = await client.patchSets.fork(setId, opts.name ? { name: opts.name } : undefined);
+  log(`Forked patch set:`);
+  log(`  ID:   ${result.id}`);
+  log(`  Name: ${result.name}`);
+  log(`  From: ${result.forkedFromId}`);
+}
+
+/**
+ * Handle `gitforge patch subscribe`.
+ */
+export async function handlePatchSubscribe(
+  client: GitForge,
+  opts: PatchSetIdOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  await client.patchSets.subscribe(opts.set);
+  log(`Subscribed to upstream updates for ${opts.set}`);
+}
+
+/**
+ * Handle `gitforge patch unsubscribe`.
+ */
+export async function handlePatchUnsubscribe(
+  client: GitForge,
+  opts: PatchSetIdOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  await client.patchSets.unsubscribe(opts.set);
+  log(`Unsubscribed from upstream updates for ${opts.set}`);
+}
+
+/**
+ * Handle `gitforge patch updates`.
+ */
+export async function handlePatchUpdates(
+  client: GitForge,
+  opts: PatchSetIdOpts & { format?: "table" | "json" | "quiet" },
+  log: Logger = console.log,
+): Promise<void> {
+  const result = await client.patchSets.getUpdates(opts.set);
+
+  const format = opts.format ?? "table";
+
+  if (format === "json") {
+    log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (!result.hasUpdates) {
+    log(`No upstream updates for ${opts.set}`);
+    return;
+  }
+
+  log(`Upstream updates available (${result.changes.length} change(s)):`);
+  const headers = ["TYPE", "PATCH", "ORDER"];
+  const rows = result.changes.map((c) => [
+    c.type,
+    c.name,
+    String(c.order),
+  ]);
+
+  const output = formatOutput(result.changes, headers, rows, format);
+  if (output) {
+    log(output.trimEnd());
+  }
+}
+
+interface PatchAcceptOpts {
+  set: string;
+  all?: boolean;
+  patch?: string[];
+}
+
+/**
+ * Handle `gitforge patch accept`.
+ */
+export async function handlePatchAccept(
+  client: GitForge,
+  opts: PatchAcceptOpts,
+  log: Logger = console.log,
+): Promise<void> {
+  const patches: string[] | ["all"] = opts.all ? ["all"] : (opts.patch ?? ["all"]);
+  const result = await client.patchSets.acceptUpdates(opts.set, { patches });
+  log(`Accepted ${result.accepted} update(s)`);
+  if (result.conflicts > 0) {
+    log(`  Conflicts: ${result.conflicts}`);
+  }
+}
+
 /**
  * Register patch subcommands with commander.
  */
@@ -276,6 +408,116 @@ export function registerPatchCommands(program: Command): void {
         const token = opts.token ?? program.opts().token;
         const client = createClient(token);
         await handlePatchMaterialize(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  // ---- Sharing subcommands ----
+
+  patch
+    .command("publish")
+    .description("Publish a patch set (make public)")
+    .requiredOption("--set <id>", "Patch set ID")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchPublish(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("unpublish")
+    .description("Unpublish a patch set (make private)")
+    .requiredOption("--set <id>", "Patch set ID")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchUnpublish(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("fork <setId>")
+    .description("Fork a public patch set into your account")
+    .option("--name <name>", "Custom name for the fork")
+    .action(async (setId, opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchFork(client, setId, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("subscribe")
+    .description("Subscribe to upstream updates on a forked patch set")
+    .requiredOption("--set <id>", "Patch set ID")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchSubscribe(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("unsubscribe")
+    .description("Unsubscribe from upstream updates")
+    .requiredOption("--set <id>", "Patch set ID")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchUnsubscribe(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("updates")
+    .description("Check for upstream updates on a subscribed patch set")
+    .requiredOption("--set <id>", "Patch set ID")
+    .option("--format <fmt>", "Output format (table or json)", "table")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchUpdates(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("accept")
+    .description("Accept upstream updates into a subscribed patch set")
+    .requiredOption("--set <id>", "Patch set ID")
+    .option("--all", "Accept all pending updates")
+    .option("--patch <id...>", "Accept specific patch IDs")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchAccept(client, opts);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
