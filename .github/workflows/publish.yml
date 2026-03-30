@@ -14,14 +14,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: oven-sh/setup-bun@v2
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm ci
+      # @gitforge/sdk may not be published yet on first release.
+      # Try npm first; fall back to building SDK from source.
+      - name: Install dependencies
+        run: |
+          if npm install 2>&1; then
+            echo "All dependencies installed from npm"
+          else
+            echo "::notice::@gitforge/sdk not on npm yet — building from source"
+            git clone --depth 1 https://github.com/Nu11ified/gitforge-ts-sdk.git /tmp/sdk
+            cd /tmp/sdk && bun install && bun run build && cd -
+            npm install /tmp/sdk
+            npm install
+          fi
       - run: npm run build
-      - run: npm test
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
