@@ -146,15 +146,15 @@ gitforge release notes --repo $REPO_ID --base $PREV_TAG --head $NEW_TAG
 
 ## Contributing
 
-This CLI is developed inside the [GitForge monorepo](https://github.com/Nu11ified/GitForge) at `sdks/cli/` and published to this repo via git subtree.
+Contributions are welcome! Please open a pull request against this repository.
 
-To contribute:
+1. Fork this repo
+2. Install dependencies: `bun install`
+3. Make your changes
+4. Run tests: `bun test`
+5. Submit a PR
 
-1. Clone the monorepo: `git clone https://github.com/Nu11ified/GitForge.git`
-2. Install dependencies: `cd sdks/cli && bun install`
-3. Make changes in `sdks/cli/`
-4. Run tests: `bun test sdks/cli/`
-5. Submit a PR to the monorepo
+Accepted changes are pulled into the main GitForge monorepo by the maintainers.
 
 ## License
 
