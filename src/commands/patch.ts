@@ -164,6 +164,35 @@ export async function handlePatchMaterialize(
   log(`Status: ${result.status}`);
 }
 
+/**
+ * Handle `gitforge patch push`.
+ * Calls the extract-from-commits endpoint to turn pushed commits into patches.
+ */
+export async function handlePatchPush(
+  client: GitForge,
+  opts: { set: string; branch?: string; since?: string },
+  log: Logger = console.log,
+): Promise<void> {
+  // Default branch to patches/<set-name> — get the set to determine the branch
+  const ps = await client.patchSets.get(opts.set);
+  const branch = opts.branch ?? ps.materializedBranch ?? `patches/${ps.name}`;
+
+  const result = await client.patchSets.extractFromCommits(opts.set, {
+    branch,
+    since: opts.since,
+  });
+
+  if (result.extracted.length === 0) {
+    log("No new commits to extract as patches.");
+    return;
+  }
+
+  log(`Extracted ${result.extracted.length} patch(es):`);
+  for (const p of result.extracted) {
+    log(`  #${p.order} ${p.name} (${p.id})`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Sharing handlers
 // ---------------------------------------------------------------------------
@@ -408,6 +437,23 @@ export function registerPatchCommands(program: Command): void {
         const token = opts.token ?? program.opts().token;
         const client = createClient(token);
         await handlePatchMaterialize(client, opts);
+      } catch (err: any) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+      }
+    });
+
+  patch
+    .command("push")
+    .description("Extract pushed commits on the materialized branch as patches")
+    .requiredOption("--set <id>", "Patch set ID")
+    .option("--branch <branch>", "Branch to extract from (defaults to materialized branch)")
+    .option("--since <sha>", "Only extract commits after this SHA")
+    .action(async (opts) => {
+      try {
+        const token = opts.token ?? program.opts().token;
+        const client = createClient(token);
+        await handlePatchPush(client, opts);
       } catch (err: any) {
         console.error(`Error: ${err.message}`);
         process.exit(1);
