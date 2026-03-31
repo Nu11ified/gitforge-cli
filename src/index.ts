@@ -10,6 +10,8 @@ import { registerReleaseCommands } from "./commands/release";
 import { registerStorageCommands } from "./commands/storage";
 import { registerSyncCommand } from "./commands/sync";
 import { registerPatchCommands } from "./commands/patch";
+import { registerChangeCommands } from "./commands/change";
+import { registerOpCommands } from "./commands/op";
 
 const program = new Command();
 
@@ -30,6 +32,8 @@ registerReleaseCommands(program);
 registerStorageCommands(program);
 registerSyncCommand(program);
 registerPatchCommands(program);
+registerChangeCommands(program);
+registerOpCommands(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
