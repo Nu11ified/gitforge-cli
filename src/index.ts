@@ -12,6 +12,11 @@ import { registerSyncCommand } from "./commands/sync";
 import { registerPatchCommands } from "./commands/patch";
 import { registerChangeCommands } from "./commands/change";
 import { registerOpCommands } from "./commands/op";
+import { registerHotCommands } from "./commands/hot";
+import { registerRecipeCommands } from "./commands/recipe";
+import { registerJobCommands } from "./commands/job";
+import { registerStreamCommands } from "./commands/stream";
+import { registerStateCommands } from "./commands/state";
 
 const program = new Command();
 
@@ -34,6 +39,11 @@ registerSyncCommand(program);
 registerPatchCommands(program);
 registerChangeCommands(program);
 registerOpCommands(program);
+registerHotCommands(program);
+registerRecipeCommands(program);
+registerJobCommands(program);
+registerStreamCommands(program);
+registerStateCommands(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
