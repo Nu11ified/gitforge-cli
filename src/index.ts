@@ -18,6 +18,7 @@ import { registerRecipeCommands } from "./commands/recipe";
 import { registerJobCommands } from "./commands/job";
 import { registerStreamCommands } from "./commands/stream";
 import { registerStateCommands } from "./commands/state";
+import { registerShellCommands } from "./commands/shell";
 
 const program = new Command();
 
@@ -46,6 +47,7 @@ registerRecipeCommands(program);
 registerJobCommands(program);
 registerStreamCommands(program);
 registerStateCommands(program);
+registerShellCommands(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err.message);
